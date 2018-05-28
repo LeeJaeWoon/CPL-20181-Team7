@@ -2,9 +2,7 @@
 #include <SoftwareSerial.h>
 #include "VoiceRecognitionV3.h"
 #include <Wire.h> 
-#include <LiquidCrystal_I2C.h>
 
-LiquidCrystal_I2C lcd(0x27,16,2);
 VR myVR(2,3); 
 SoftwareSerial btSerial(4, 5); //t,r
 byte buffer[1024]; 
@@ -17,8 +15,6 @@ int Relay = 6;//6번 릴레이
 #define one   (1)  //전진해
 #define two    (2) //후진해
 #define three   (3) //좌회전
-#define onRecord    (14)  //불켜줘
-#define offRecord   (15)  //불꺼줘
 #define goldRecord   (16) //우회전
 
 void printSignature(uint8_t *buf, int len)
@@ -70,10 +66,6 @@ void printVR(uint8_t *buf)
 
 void setup() { 
   btSerial.begin(9600);
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(3,0);
-  lcd.print("0123456");
   myVR.begin(9600);
   Serial.begin(115200);
   pinMode(Relay,OUTPUT); //릴레이모듈
@@ -86,7 +78,6 @@ void setup() {
     Serial.println("Please check connection and restart Arduino.");
     while(1);
   }
-  
   if(myVR.load((uint8_t)zero) >= 0){
     Serial.println("멈춰");
   }
@@ -112,68 +103,32 @@ void setup() {
 }
 
 void loop() {
-  /*if(Serial.available())
-  {
-    delay(5);  
-    while(Serial.available())
-    {
-      btSerial.write(Serial.read());
-    }
-  }*/
-    
   int ret;
   ret = myVR.recognize(buf, 50);
   
   if(ret>0){
     switch(buf[1]){
-      case onRecord:
-        lcd.clear();
-        lcd.setCursor(3,0);
-        lcd.print("on led");
-        digitalWrite(Relay,HIGH);
-        break;
-      case offRecord:
-        lcd.clear();
-        lcd.setCursor(3,0);
-        lcd.print("off led");
-        digitalWrite(Relay,LOW);
-        break;
       case zero:
-        lcd.clear();
-        lcd.setCursor(3,0);
-        lcd.print("stop");
         btSerial.write('0');
         Serial.println('x');
         delay(10);
         break;
       case one:
-        lcd.clear();
-        lcd.setCursor(3,0);
-        lcd.print("go!");
         btSerial.write('1');
         Serial.println('w');
         delay(10);
         break;
       case two:
-        lcd.clear();
-        lcd.setCursor(3,0);
-        lcd.print("back");
         btSerial.write('2');
         Serial.println('s');
         delay(10);
         break;
       case three:
-        lcd.clear();
-        lcd.setCursor(3,0);
-        lcd.print("left");
         btSerial.write('3');
         Serial.println('a');
         delay(10);
         break;
       case goldRecord:
-        lcd.clear();
-        lcd.setCursor(3,0);
-        lcd.print("Right");
         btSerial.write('4');
         Serial.println('d');
         delay(10);
@@ -182,10 +137,7 @@ void loop() {
         Serial.println("Record function undefined");
         break;
     }
-    /** voice recognized */
-    //printVR(buf);
   }
-  //Serial.println("000000000000");
 }
 
 
